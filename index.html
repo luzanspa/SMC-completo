@@ -1580,7 +1580,7 @@
                 <div style="grid-column: span 2;"><label for="consultasMedicoExame">Médico / Exame</label><input type="text" id="consultasMedicoExame" placeholder="Nome do médico ou tipo de exame" required></div>
                 
                 <div style="grid-column: span 1;"><label for="consultasAcs">ACS / Tel.</label><input type="text" id="consultasAcs" placeholder="Nome do ACS ou telefone"></div>
-                <div style="grid-column: span 1;"><label for="consultasCns">CNS</label><input type="text" id="consultasCns" placeholder="Número do CNS"></div>
+                <div style="grid-column: span 1;"><label for="consultasCns">CNS/CPF</label><input type="text" id="consultasCns" placeholder="Número do CNS ou CPF"></div>
                 <div style="grid-column: span 1;"><label for="consultasObs">OBS</label><input type="text" id="consultasObs" placeholder="Observações"></div>
                 <div style="grid-column: span 1;"><button type="submit">Cadastrar</button></div>
             </form>
@@ -2840,7 +2840,7 @@
 
             const table = Object.assign(document.createElement('table'), {
                 className: 'consultas-table',
-                innerHTML: `<tr><th>N°</th><th>Data Cadastro</th><th>Paciente</th><th>Médico/Exame</th><th>Data</th><th>Hora</th><th>Local</th><th>ACS / Tel.</th><th>CNS</th><th>OBS</th><th>Ações</th></tr>`
+                innerHTML: `<tr><th>N°</th><th>Data Cadastro</th><th>Paciente</th><th>Médico/Exame</th><th>Data</th><th>Hora</th><th>Local</th><th>ACS / Tel.</th><th>CNS/CPF</th><th>OBS</th><th>Ações</th></tr>`
             });
             document.getElementById('consultasTablesContainer').appendChild(table);
 
@@ -3025,7 +3025,7 @@
             consultasCaptureAllTableData();
             const resultTable = Object.assign(document.createElement('table'), {
                 className: 'consultas-table',
-                innerHTML: `<tr><th>Aba</th><th>N°</th><th>Data Cadastro</th><th>Paciente</th><th>Médico/Exame</th><th>Data</th><th>Hora</th><th>Local</th><th>ACS / Tel.</th><th>CNS</th><th>OBS</th></tr>`
+                innerHTML: `<tr><th>Aba</th><th>N°</th><th>Data Cadastro</th><th>Paciente</th><th>Médico/Exame</th><th>Data</th><th>Hora</th><th>Local</th><th>ACS / Tel.</th><th>CNS/CPF</th><th>OBS</th></tr>`
             });
             let foundResults = false;
 
@@ -3148,7 +3148,7 @@
             const firstHeaderRow = document.querySelector('.consultas-table tr');
             if (firstHeaderRow) {
                 const globalHeader = [
-                    "N°", "Data Cadastro", "Paciente", "Médico/Exame", "Data", "Hora", "Local", "ACS / Tel.", "CNS", "OBS"
+                    "N°", "Data Cadastro", "Paciente", "Médico/Exame", "Data", "Hora", "Local", "ACS / Tel.", "CNS/CPF", "OBS"
                 ].map(cell => `"${cell.replace(/"/g, '""')}"`).join(';');
                 csvContent += globalHeader + '\n';
             }
@@ -3169,7 +3169,7 @@
                         cells[5].textContent, // Hora
                         cells[6].textContent, // Local
                         cells[7].textContent, // ACS
-                        cells[8].textContent, // CNS
+                        cells[8].textContent, // CNS/CPF
                         cells[9].textContent  // OBS
                     ].map(cell => `"${cell.replace(/"/g, '""')}"`).join(';');
                     csvContent += rowData + '\n';
@@ -3199,7 +3199,7 @@
             const firstHeaderRow = document.querySelector('.consultas-table tr');
             if (firstHeaderRow) {
                 const globalHeader = [
-                    "N°", "Data Cadastro", "Paciente", "Médico/Exame", "Data", "Hora", "Local", "ACS / Tel.", "CNS", "OBS"
+                    "N°", "Data Cadastro", "Paciente", "Médico/Exame", "Data", "Hora", "Local", "ACS / Tel.", "CNS/CPF", "OBS"
                 ].map(cell => `"${cell.replace(/"/g, '""')}"`).join(';');
                 csvContent += globalHeader + '\n';
             }
@@ -3643,7 +3643,7 @@
 
             const table = Object.assign(document.createElement('table'), {
                 className: 'consultas-table',
-                innerHTML: `<tr><th>N°</th><th>Data Cadastro</th><th>Paciente</th><th>Médico/Exame</th><th>Data</th><th>Hora</th><th>Local</th><th>ACS / Tel.</th><th>CNS</th><th>OBS</th><th>Ações</th></tr>`
+                innerHTML: `<tr><th>N°</th><th>Data Cadastro</th><th>Paciente</th><th>Médico/Exame</th><th>Data</th><th>Hora</th><th>Local</th><th>ACS / Tel.</th><th>CNS/CPF</th><th>OBS</th><th>Ações</th></tr>`
             });
             tablesContainer.appendChild(table);
 
@@ -3920,197 +3920,290 @@
         }
 
         function goToAdmin() {
-            const modal = document.getElementById('adminChoiceModal');
-            if (modal) modal.classList.add('hidden');
-            showAdminPanel();
+            try {
+                const modal = document.getElementById('adminChoiceModal');
+                if (modal) modal.classList.add('hidden');
+                showAdminPanel();
+            } catch (error) {
+                console.error('Erro ao acessar painel admin:', error);
+                showNotification('Erro interno. Tente novamente.', 'error');
+            }
         }
 
         function goToProgram() {
-            const modal = document.getElementById('adminChoiceModal');
-            if (modal) modal.classList.add('hidden');
-            showConsultasPanel();
+            try {
+                const modal = document.getElementById('adminChoiceModal');
+                if (modal) modal.classList.add('hidden');
+                showConsultasPanel();
+            } catch (error) {
+                console.error('Erro ao acessar programa:', error);
+                showNotification('Erro interno. Tente novamente.', 'error');
+            }
         }
 
         function showConsultasPanel() {
-            const elements = {
-                login: document.getElementById('loginSection'),
-                admin: document.getElementById('adminPanel'),
-                consultas: document.getElementById('consultasPanel')
-            };
-            
-            if (elements.login) elements.login.style.display = 'none';
-            if (elements.admin) elements.admin.style.display = 'none';
-            if (elements.consultas) {
-                elements.consultas.style.display = 'block';
-                document.body.style.overflow = 'auto';
+            try {
+                const elements = {
+                    login: document.getElementById('loginSection'),
+                    admin: document.getElementById('adminPanel'),
+                    consultas: document.getElementById('consultasPanel')
+                };
+                
+                if (elements.login) elements.login.style.display = 'none';
+                if (elements.admin) elements.admin.style.display = 'none';
+                if (elements.consultas) {
+                    elements.consultas.style.display = 'block';
+                    document.body.style.overflow = 'auto';
+                }
+                
+                initConsultasSystem();
+            } catch (error) {
+                console.error('Erro ao mostrar painel de consultas:', error);
+                showNotification('Erro ao carregar painel. Recarregue a página.', 'error');
             }
-            
-            initConsultasSystem();
         }
 
         function showSMCInfo() {
-            const modal = document.getElementById('smcInfoModal');
-            if (modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
+            try {
+                const modal = document.getElementById('smcInfoModal');
+                if (modal) {
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }
+            } catch (error) {
+                console.error('Erro ao abrir modal SMC:', error);
             }
         }
 
         function closeSMCInfo() {
-            const modal = document.getElementById('smcInfoModal');
-            if (modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = 'auto';
+            try {
+                const modal = document.getElementById('smcInfoModal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                }
+            } catch (error) {
+                console.error('Erro ao fechar modal SMC:', error);
             }
         }
 
         function showFeatureDetail(feature) {
-            document.getElementById('smcMainContent').classList.add('hidden');
-            document.getElementById(feature + 'Detail').classList.add('active');
+            try {
+                const mainContent = document.getElementById('smcMainContent');
+                const detailPage = document.getElementById(feature + 'Detail');
+                
+                if (mainContent) mainContent.classList.add('hidden');
+                if (detailPage) detailPage.classList.add('active');
+            } catch (error) {
+                console.error('Erro ao mostrar detalhes:', error);
+            }
         }
 
         function backToMain() {
-            document.querySelectorAll('.smc-detail-page').forEach(page => {
-                page.classList.remove('active');
-            });
-            document.getElementById('smcMainContent').classList.remove('hidden');
+            try {
+                document.querySelectorAll('.smc-detail-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                const mainContent = document.getElementById('smcMainContent');
+                if (mainContent) mainContent.classList.remove('hidden');
+            } catch (error) {
+                console.error('Erro ao voltar ao menu principal:', error);
+            }
         }
 
         function showForgotPassword() {
-            const modal = document.getElementById('forgotPasswordModal');
-            if (modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
-                
-                // Adicionar máscara ao CPF
-                const cpfInput = document.getElementById('recoveryCpf');
-                cpfInput.addEventListener('input', maskCPF);
-                
-                // Adicionar evento ao formulário
-                document.getElementById('forgotPasswordForm').addEventListener('submit', handlePasswordRecovery);
+            try {
+                const modal = document.getElementById('forgotPasswordModal');
+                if (modal) {
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Adicionar máscara ao CPF
+                    const cpfInput = document.getElementById('recoveryCpf');
+                    if (cpfInput) cpfInput.addEventListener('input', maskCPF);
+                    
+                    // Adicionar evento ao formulário
+                    const form = document.getElementById('forgotPasswordForm');
+                    if (form) form.addEventListener('submit', handlePasswordRecovery);
+                }
+            } catch (error) {
+                console.error('Erro ao abrir recuperação de senha:', error);
+                showNotification('Erro ao abrir formulário. Tente novamente.', 'error');
             }
         }
 
         function closeForgotPassword() {
-            const modal = document.getElementById('forgotPasswordModal');
-            if (modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = 'auto';
-                document.getElementById('forgotPasswordForm').reset();
+            try {
+                const modal = document.getElementById('forgotPasswordModal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                    const form = document.getElementById('forgotPasswordForm');
+                    if (form) form.reset();
+                }
+            } catch (error) {
+                console.error('Erro ao fechar recuperação de senha:', error);
             }
         }
 
         function handlePasswordRecovery(e) {
-            e.preventDefault();
-            const cpf = document.getElementById('recoveryCpf').value.trim();
-            const birthDate = document.getElementById('recoveryBirthDate').value;
-            
-            if (!cpf || !birthDate) {
-                showNotification('Preencha todos os campos!', 'error');
-                return;
-            }
-            
-            if (!validateCPF(cpf)) {
-                showNotification('CPF inválido!', 'error');
-                return;
-            }
-            
-            // Simular verificação (em sistema real, verificaria no banco de dados)
-            const user = users.find(u => u.cpf === cpf);
-            
-            if (user) {
-                // Gerar nova senha temporária
-                const newPassword = 'temp' + Math.random().toString(36).substr(2, 6);
-                user.password = newPassword;
+            try {
+                e.preventDefault();
+                const cpfInput = document.getElementById('recoveryCpf');
+                const birthInput = document.getElementById('recoveryBirthDate');
                 
-                // Salvar no localStorage
-                localStorage.setItem('smc_users', JSON.stringify(users));
+                if (!cpfInput || !birthInput) {
+                    showNotification('Erro no formulário. Recarregue a página.', 'error');
+                    return;
+                }
                 
-                // Mostrar nova senha
+                const cpf = cpfInput.value.trim();
+                const birthDate = birthInput.value;
+                
+                if (!cpf || !birthDate) {
+                    showNotification('Preencha todos os campos!', 'error');
+                    return;
+                }
+                
+                if (!validateCPF(cpf)) {
+                    showNotification('CPF inválido!', 'error');
+                    return;
+                }
+                
+                // Simular verificação (em sistema real, verificaria no banco de dados)
+                const user = users.find(u => u.cpf === cpf);
+                
+                if (user) {
+                    // Gerar nova senha temporária
+                    const newPassword = 'temp' + Math.random().toString(36).substr(2, 6);
+                    user.password = newPassword;
+                    
+                    // Salvar no localStorage
+                    localStorage.setItem('smc_users', JSON.stringify(users));
+                    
+                    // Mostrar nova senha
+                    const successModal = Object.assign(document.createElement('div'), {
+                        className: 'confirm-modal show',
+                        innerHTML: `
+                            <div class="confirm-content" style="text-align: center;">
+                                <div style="width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; background: linear-gradient(135deg, #28a745, #20c997); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white;">✓</div>
+                                <h3 style="color: #28a745; margin-bottom: 15px;">Senha Redefinida!</h3>
+                                <p style="margin-bottom: 20px;">Sua nova senha temporária é:</p>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px;">${newPassword}</div>
+                                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Anote esta senha e altere-a após fazer login.</p>
+                                <button onclick="this.closest('.confirm-modal').remove(); closeForgotPassword();" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600;">Entendi</button>
+                            </div>
+                        `
+                    });
+                    
+                    document.body.appendChild(successModal);
+                    
+                } else {
+                    showNotification('CPF não encontrado no sistema!', 'error');
+                }
+            } catch (error) {
+                console.error('Erro na recuperação de senha:', error);
+                showNotification('Erro interno. Tente novamente.', 'error');
+            }
+        }
+
+        function showHelpCenter() {
+            try {
+                const modal = document.getElementById('helpCenterModal');
+                if (modal) {
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }
+            } catch (error) {
+                console.error('Erro ao abrir central de ajuda:', error);
+            }
+        }
+
+        function closeHelpCenter() {
+            try {
+                const modal = document.getElementById('helpCenterModal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                }
+            } catch (error) {
+                console.error('Erro ao fechar central de ajuda:', error);
+            }
+        }
+
+        function showContact() {
+            try {
+                const modal = document.getElementById('contactModal');
+                if (modal) {
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Adicionar evento ao formulário
+                    const form = document.getElementById('contactForm');
+                    if (form) form.addEventListener('submit', handleContactForm);
+                }
+            } catch (error) {
+                console.error('Erro ao abrir contato:', error);
+                showNotification('Erro ao abrir formulário de contato.', 'error');
+            }
+        }
+
+        function closeContact() {
+            try {
+                const modal = document.getElementById('contactModal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                    const form = document.getElementById('contactForm');
+                    if (form) form.reset();
+                }
+            } catch (error) {
+                console.error('Erro ao fechar contato:', error);
+            }
+        }
+
+        function handleContactForm(e) {
+            try {
+                e.preventDefault();
+                const nameInput = document.getElementById('contactName');
+                const emailInput = document.getElementById('contactEmail');
+                const subjectInput = document.getElementById('contactSubject');
+                const messageInput = document.getElementById('contactMessage');
+                
+                if (!nameInput || !emailInput || !subjectInput || !messageInput) {
+                    showNotification('Erro no formulário. Recarregue a página.', 'error');
+                    return;
+                }
+                
+                const name = nameInput.value.trim();
+                const email = emailInput.value.trim();
+                const subject = subjectInput.value;
+                const message = messageInput.value.trim();
+                
+                if (!name || !email || !subject || !message) {
+                    showNotification('Preencha todos os campos!', 'error');
+                    return;
+                }
+                
+                // Simular envio da mensagem
                 const successModal = Object.assign(document.createElement('div'), {
                     className: 'confirm-modal show',
                     innerHTML: `
                         <div class="confirm-content" style="text-align: center;">
                             <div style="width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; background: linear-gradient(135deg, #28a745, #20c997); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white;">✓</div>
-                            <h3 style="color: #28a745; margin-bottom: 15px;">Senha Redefinida!</h3>
-                            <p style="margin-bottom: 20px;">Sua nova senha temporária é:</p>
-                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px;">${newPassword}</div>
-                            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Anote esta senha e altere-a após fazer login.</p>
-                            <button onclick="this.closest('.confirm-modal').remove(); closeForgotPassword();" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600;">Entendi</button>
+                            <h3 style="color: #28a745; margin-bottom: 15px;">Mensagem Enviada!</h3>
+                            <p style="margin-bottom: 20px;">Sua mensagem foi recebida com sucesso.</p>
+                            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Nossa equipe entrará em contato em breve através do e-mail: <strong>${email}</strong></p>
+                            <button onclick="this.closest('.confirm-modal').remove(); closeContact();" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600;">Entendi</button>
                         </div>
                     `
                 });
                 
                 document.body.appendChild(successModal);
-                
-            } else {
-                showNotification('CPF não encontrado no sistema!', 'error');
+            } catch (error) {
+                console.error('Erro ao enviar mensagem:', error);
+                showNotification('Erro ao enviar mensagem. Tente novamente.', 'error');
             }
-        }
-
-        function showHelpCenter() {
-            const modal = document.getElementById('helpCenterModal');
-            if (modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeHelpCenter() {
-            const modal = document.getElementById('helpCenterModal');
-            if (modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        function showContact() {
-            const modal = document.getElementById('contactModal');
-            if (modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
-                
-                // Adicionar evento ao formulário
-                document.getElementById('contactForm').addEventListener('submit', handleContactForm);
-            }
-        }
-
-        function closeContact() {
-            const modal = document.getElementById('contactModal');
-            if (modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = 'auto';
-                document.getElementById('contactForm').reset();
-            }
-        }
-
-        function handleContactForm(e) {
-            e.preventDefault();
-            const name = document.getElementById('contactName').value.trim();
-            const email = document.getElementById('contactEmail').value.trim();
-            const subject = document.getElementById('contactSubject').value;
-            const message = document.getElementById('contactMessage').value.trim();
-            
-            if (!name || !email || !subject || !message) {
-                showNotification('Preencha todos os campos!', 'error');
-                return;
-            }
-            
-            // Simular envio da mensagem
-            const successModal = Object.assign(document.createElement('div'), {
-                className: 'confirm-modal show',
-                innerHTML: `
-                    <div class="confirm-content" style="text-align: center;">
-                        <div style="width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; background: linear-gradient(135deg, #28a745, #20c997); display: flex; align-items: center; justify-content: center; font-size: 36px; color: white;">✓</div>
-                        <h3 style="color: #28a745; margin-bottom: 15px;">Mensagem Enviada!</h3>
-                        <p style="margin-bottom: 20px;">Sua mensagem foi recebida com sucesso.</p>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Nossa equipe entrará em contato em breve através do e-mail: <strong>${email}</strong></p>
-                        <button onclick="this.closest('.confirm-modal').remove(); closeContact();" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 8px; padding: 12px 24px; cursor: pointer; font-weight: 600;">Entendi</button>
-                    </div>
-                `
-            });
-            
-            document.body.appendChild(successModal);
         }
     </script>
 </body>
