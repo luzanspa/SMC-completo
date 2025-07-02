@@ -850,28 +850,60 @@
             transition: background-color 0.3s ease;
         }
 
-        .consultas-table button.edit-btn {
-            background-color: #ffc107;
+        .table-actions {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            align-items: center;
         }
 
-        .consultas-table button.edit-btn:hover {
-            background-color: #e0a800;
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
-        .consultas-table button.save-btn {
-            background-color: #28a745;
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
         }
 
-        .consultas-table button.save-btn:hover {
-            background-color: #218838;
+        .action-btn.btn-edit {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #212529;
         }
 
-        .consultas-table button.cancel-btn {
-            background-color: #dc3545;
+        .action-btn.btn-move {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
         }
 
-        .consultas-table button.cancel-btn:hover {
-            background-color: #c82333;
+        .action-btn.btn-delete {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .action-btn:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 1000;
         }
 
         .consultas-table button:hover {
@@ -2795,7 +2827,13 @@
             row.insertCell(9).textContent = obs;
 
             const actions = row.insertCell(10);
-            actions.innerHTML = `<button class="edit-btn" onclick="consultasEditarCadastro(this)">Editar</button> <button onclick="consultasExcluirCadastro(this)">Excluir</button>`;
+            actions.innerHTML = `
+                <div class="table-actions">
+                    <button class="action-btn btn-edit" onclick="consultasEditarCadastro(this)" title="Editar">✏️</button>
+                    <button class="action-btn btn-move" onclick="consultasMoverCadastro(this)" title="Mover">📋</button>
+                    <button class="action-btn btn-delete" onclick="consultasExcluirCadastro(this)" title="Excluir">🗑️</button>
+                </div>
+            `;
         }
 
         function consultasFormatDate(dateString, toDisplay = true) {
@@ -2907,7 +2945,7 @@
                 return;
             }
             
-            const row = btn.parentNode.parentNode;
+            const row = btn.closest('tr');
             const cells = [...row.cells];
             consultasEditingRowIndex = row.rowIndex - 1; // -1 porque o header é row 0
             
@@ -3005,10 +3043,94 @@
             consultasShowToast('Edição cancelada', 'info');
         }
 
+        function consultasMoverCadastro(btn) {
+            const row = btn.closest('tr');
+            const cells = [...row.cells];
+            const tabs = [...document.querySelectorAll('.consultas-tab')];
+            
+            if (tabs.length <= 1) {
+                consultasShowToast('Não há outras abas para mover!', 'info');
+                return;
+            }
+            
+            const modal = Object.assign(document.createElement('div'), {
+                className: 'confirm-modal show',
+                innerHTML: `
+                    <div class="confirm-content">
+                        <div style="width: 60px; height: 60px; margin: 0 auto 15px; border-radius: 50%; background: linear-gradient(135deg, #17a2b8, #138496); display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">📋</div>
+                        <h3 style="color: #17a2b8; margin-bottom: 15px;">Mover Cadastro</h3>
+                        <p style="margin-bottom: 20px;">Para qual aba deseja mover este cadastro?</p>
+                        <p style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 14px;"><strong>Paciente:</strong> ${cells[2].textContent}</p>
+                        <select id="targetTab" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px; margin-bottom: 20px;">
+                            ${tabs.map((tab, i) => i !== consultasCurrentTab ? 
+                                `<option value="${i}">${tab.textContent}</option>` : '').join('')}
+                        </select>
+                        <div class="confirm-buttons">
+                            <button class="confirm-btn secondary" onclick="this.closest('.confirm-modal').remove()">Cancelar</button>
+                            <button class="confirm-btn" onclick="consultasExecutarMovimento(this)" style="background: linear-gradient(135deg, #17a2b8, #138496);">Mover</button>
+                        </div>
+                    </div>
+                `
+            });
+            
+            document.body.appendChild(modal);
+            
+            // Armazenar dados da linha para mover
+            modal.rowData = {
+                dataCadastro: consultasFormatDate(cells[1].textContent, false),
+                paciente: cells[2].textContent,
+                medicoExame: cells[3].textContent,
+                dataExame: consultasFormatDate(cells[4].textContent, false),
+                hora: cells[5].textContent,
+                local: cells[6].textContent,
+                acs: cells[7].textContent,
+                cns: cells[8].textContent,
+                obs: cells[9].textContent,
+                sourceRow: row
+            };
+        }
+        
+        function consultasExecutarMovimento(btn) {
+            const modal = btn.closest('.confirm-modal');
+            const targetTabIndex = parseInt(document.getElementById('targetTab').value);
+            const targetTable = document.querySelectorAll('.consultas-table')[targetTabIndex];
+            const targetTabName = document.querySelectorAll('.consultas-tab')[targetTabIndex].textContent;
+            const rowData = modal.rowData;
+            
+            // Adicionar na aba de destino
+            consultasAdicionarLinhaTabela(
+                targetTable,
+                rowData.dataCadastro,
+                rowData.medicoExame,
+                rowData.paciente,
+                rowData.dataExame,
+                rowData.hora,
+                rowData.local,
+                rowData.acs,
+                rowData.cns,
+                rowData.obs
+            );
+            
+            // Remover da aba atual
+            const sourceTable = rowData.sourceRow.parentNode;
+            rowData.sourceRow.remove();
+            
+            // Reindexar ambas as tabelas
+            consultasReindexTable(sourceTable);
+            consultasReindexTable(targetTable);
+            
+            // Salvar e notificar
+            consultasSalvarLocalStorage();
+            consultasShowToast(`Cadastro movido para "${targetTabName}" com sucesso!`, 'success');
+            
+            modal.remove();
+        }
+
         function consultasExcluirCadastro(btn) {
             if (confirm('Deseja excluir este cadastro?')) {
-                const table = btn.parentNode.parentNode.parentNode;
-                btn.parentNode.parentNode.remove();
+                const row = btn.closest('tr');
+                const table = row.parentNode;
+                row.remove();
                 consultasReindexTable(table);
                 consultasSalvarLocalStorage();
                 consultasShowToast('Cadastro excluído.', 'success');
